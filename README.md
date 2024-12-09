@@ -37,7 +37,7 @@ A user management system built with Symfony, featuring authentication via a web 
 3. **Install Node.js depencecies** yarn install
 4. **Configure the database** Update .env
 5. **Create the database and run migrations**
-6. **Compile assets** yarn encore dev
+6. **Compile assets** run : yarn encore dev
 7. **Generate JWT keys**
      - mkdir -p config/jwt
      - openssl genrsa -out config/jwt/private.pem -aes256 4096
