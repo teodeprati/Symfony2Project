@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1>Ajouter un utilisateur</h1>
+    <form method="post" class="mt-4">
+        <div class="form-group">
+            <label for="name">Nom</label>
+            <input type="text" id="name" name="name" class="form-control" required>
+        </div>
+        <div class="form-group mt-3">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" class="form-control" required>
+        </div>
+        <div class="form-group mt-3">
+            <label for="roles">Rôles</label>
+            <select id="roles" name="roles[]" class="form-control" multiple>
+                <option value="ROLE_USER">ROLE_USER</option>
+                <option value="ROLE_ADMIN">ROLE_ADMIN</option>
+            </select>
+            <small class="form-text text-muted">Maintenez Ctrl (ou Cmd) pour sélectionner plusieurs rôles.</small>
+        </div>
+        <button type="submit" class="btn btn-success mt-3">Enregistrer</button>
+        <a href="{{ path('user_index') }}" class="btn btn-secondary mt-3">Retour</a>
+    </form>
+</div>
+{% endblock %}
