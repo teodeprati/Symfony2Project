@@ -39,9 +39,9 @@ A user management system built with Symfony, featuring authentication via a web 
 5. **Create the database and run migrations**
 6. **Compile assets** yarn encore dev
 7. **Generate JWT keys**
-     mkdir -p config/jwt
-     openssl genrsa -out config/jwt/private.pem -aes256 4096
-     openssl rsa -pubout -in config/jwt/private.pem -out config/jwt/public.pem
+     - mkdir -p config/jwt
+     - openssl genrsa -out config/jwt/private.pem -aes256 4096
+     - openssl rsa -pubout -in config/jwt/private.pem -out config/jwt/public.pem
 8.**Update the .env file with the JWT configuration**
 
 
