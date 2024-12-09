@@ -13,33 +13,40 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
-        login:
-            pattern: ^/login
-            form_login:
-                login_path: login
-                check_path: login
-                default_target_path: /
-
-        api_login:
-            pattern: ^/api/login
-            stateless: true
-            json_login:
-                check_path: /api/login
-                success_handler: lexik_jwt_authentication.handler.authentication_success
-                failure_handler: lexik_jwt_authentication.handler.authentication_failure
-
         main:
-            lazy: true
+            pattern: ^/
             provider: app_user_provider
             form_login:
-                login_path: login
-                check_path: login
-            logout:
-                path: logout
-                target: /
+                login_path: app_login
+                check_path: /login
+                username_parameter: email
+                password_parameter: password
+                default_target_path: /users
+            security: false
+
+        # api_login:
+        #     pattern: ^/api/login
+        #     stateless: true
+        #     json_login:
+        #         check_path: /api/login
+        #         success_handler: lexik_jwt_authentication.handler.authentication_success
+        #         failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
+        # main:
+        #     lazy: true
+        #     provider: app_user_provider
+        #     form_login:
+        #         login_path: app_login
+        #         check_path: app_login
+        #         default_target_path: /
+        #     logout:
+        #         path: logout
+        #         target: /
 
     access_control:
-        - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY } 
-        - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
+        # - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        # - { path: ^/users/new, roles: PUBLIC_ACCESS }
+        # - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY } 
+        # - { path: ^/users, roles: PUBLIC_ACCESS}
+
+
