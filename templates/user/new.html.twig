@@ -18,11 +18,10 @@
         </div>
         <div class="form-group mt-3">
             <label for="roles">Rôles</label>
-            <select id="roles" name="roles[]" class="form-control" multiple>
-                <option value="ROLE_USER">ROLE_USER</option>
-                <option value="ROLE_ADMIN">ROLE_ADMIN</option>
+            <select name="role" id="role">
+                <option value="ROLE_USER" {% if app.request.get('role') == 'ROLE_USER' %}selected{% endif %}>Utilisateur</option>
+                <option value="ROLE_ADMIN" {% if app.request.get('role') == 'ROLE_ADMIN' %}selected{% endif %}>Administrateur</option>
             </select>
-            <small class="form-text text-muted">Maintenez Ctrl (ou Cmd) pour sélectionner plusieurs rôles.</small>
         </div>
         <button type="submit" class="btn btn-success mt-3">Enregistrer</button>
         <a href="{{ path('user_index') }}" class="btn btn-secondary mt-3">Retour</a>
