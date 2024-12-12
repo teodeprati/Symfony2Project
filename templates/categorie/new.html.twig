@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer une Catégorie{% endblock %}
+
+{% block body %}
+<h1>Créer une Catégorie</h1>
+
+{{ form_start(form) }}
+    {{ form_widget(form) }}
+    <button type="submit">Enregistrer</button>
+{{ form_end(form) }}
+
+<a href="{{ path('categorie_index') }}">Retour à la liste</a>
+{% endblock %}

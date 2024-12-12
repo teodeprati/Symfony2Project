@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier une Catégorie{% endblock %}
+
+{% block body %}
+<h1>Modifier la Catégorie : {{ categorie.nom }}</h1>
+
+{{ form_start(form) }}
+    {{ form_widget(form) }}
+    <button type="submit">Enregistrer les modifications</button>
+{{ form_end(form) }}
+
+<a href="{{ path('categorie_index') }}">Retour à la liste</a>
+<a href="{{ path('categorie_show', { id: categorie.id }) }}">Voir la catégorie</a>
+{% endblock %}
