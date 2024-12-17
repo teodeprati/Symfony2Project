@@ -19,10 +19,45 @@
     <p><em>Aucune catégorie associée.</em></p>
 {% endif %}
 
+<h2>Commentaires</h2>
+
+{% for commentaire in article.commentaires %}
+    <div>
+        <p>
+            <strong>{{ commentaire.auteur.email }} :</strong> {{ commentaire.contenu }}<br>
+            <small>Posté le {{ commentaire.createdAt|date('d/m/Y H:i') }}</small>
+        </p>
+
+        {% if app.user == commentaire.auteur or is_granted('ROLE_ADMIN') %}
+            <a href="{{ path('comment_edit', { id: commentaire.id }) }}">Modifier</a>
+            <form method="post" action="{{ path('comment_delete', { id: commentaire.id }) }}" style="display:inline;">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ commentaire.id) }}">
+                <button type="submit">Supprimer</button>
+            </form>
+        {% endif %}
+    </div>
+    <hr>
+{% endfor %}
+
+{% if is_granted('IS_AUTHENTICATED_FULLY') %}
+    <h3>Ajouter un commentaire</h3>
+    <form method="post" action="{{ path('comment_new', { id: article.id }) }}">
+        <textarea name="contenu" required placeholder="Votre commentaire"></textarea>
+        <button type="submit">Envoyer</button>
+    </form>
+{% else %}
+    <p><a href="{{ path('app_login') }}">Connectez-vous</a> pour ajouter un commentaire.</p>
+{% endif %}
+
+
 <a href="{{ path('article_index') }}">Retour à la liste des articles</a>
-<a href="{{ path('article_edit', { id: article.id }) }}">Modifier cet article</a>
-<form method="post" action="{{ path('article_delete', { id: article.id }) }}" style="display: inline;" onsubmit="return confirm('Voulez-vous vraiment supprimer cet article ?');">
-    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ article.id) }}">
-    <button type="submit" class="btn btn-danger">Supprimer</button>
-</form>
+
+{# Vérifie si l'utilisateur est admin ou l'auteur de l'article #}
+{% if is_granted('ROLE_ADMIN') or app.user == article.user %}
+    <a href="{{ path('article_edit', { id: article.id }) }}">Modifier cet article</a>
+    <form method="post" action="{{ path('article_delete', { id: article.id }) }}" style="display: inline;" onsubmit="return confirm('Voulez-vous vraiment supprimer cet article ?');">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ article.id) }}">
+        <button type="submit" class="btn btn-danger">Supprimer</button>
+    </form>
+{% endif %}
 {% endblock %}

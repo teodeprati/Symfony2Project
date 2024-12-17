@@ -21,11 +21,28 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 #[Route('/article', name: 'article_')]
 class ArticleController extends AbstractController
 {
+    // #[Route('/admin', name: 'index', methods: ['GET'])]
+    // public function index(ArticleRepository $articleRepository, EntityManagerInterface $entityManager): Response
+    // {
+    //     $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+    //     // Récupérer toutes les catégories
+    //     $categories = $entityManager->getRepository(Categorie::class)->findAll(); // ici je pourrais faire comme pour les articles rajouter le repo de categorie
+    
+    //     return $this->render('article/index.html.twig', [
+    //         'articles' => $articleRepository->findAll(),
+    //         'categories' => $categories, // Passer les catégories au template
+    //     ]);
+    // }
+
     #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(ArticleRepository $articleRepository): Response
+    public function userIndex(ArticleRepository $articleRepository, EntityManagerInterface $entityManager): Response
     {
+        $categories = $entityManager->getRepository(Categorie::class)->findAll();
+
         return $this->render('article/index.html.twig', [
             'articles' => $articleRepository->findAll(),
+            'categories' => $categories,
         ]);
     }
 
@@ -33,6 +50,9 @@ class ArticleController extends AbstractController
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
+        // Vérifie que l'utilisateur est connecté (admin ou utilisateur)
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
         $article = new Article();
         $form = $this->createFormBuilder($article)
         ->add('Titre', TextType::class)
@@ -48,6 +68,9 @@ class ArticleController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Associe l'article à l'utilisateur connecté
+            $article->setUser($this->getUser());
+    
             $entityManager->persist($article);
             $entityManager->flush();
 
@@ -66,10 +89,29 @@ class ArticleController extends AbstractController
             'article' => $article,
         ]);
     }
+    
+    #[Route('/category/{id}', name: 'by_category', methods: ['GET'])]
+    public function articlesByCategory(Categorie $category, ArticleRepository $articleRepository, EntityManagerInterface $entityManager): Response
+    {
+        $categories = $entityManager->getRepository(Categorie::class)->findAll();
+        $articles = $articleRepository->findByCategory($category);
+    
+        return $this->render('article/index.html.twig', [
+            'articles' => $articles,
+            'categories' => $categories,
+            'currentCategory' => $category,
+        ]);
+    }
+    
 
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Article $article, EntityManagerInterface $entityManager): Response
     {
+        // Vérifie si l'utilisateur connecté est l'auteur ou un admin
+        if (!$this->isGranted('ROLE_ADMIN') && $this->getUser() !== $article->getUser()) {
+        throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à modifier cet article.');
+    }
+
         $form = $this->createFormBuilder($article)
             ->add('Titre', TextType::class)
             ->add('content', TextareaType::class)
@@ -93,6 +135,11 @@ class ArticleController extends AbstractController
     #[Route('/{id}/delete', name: 'delete', methods: ['POST'])]
     public function delete(Request $request, Article $article, EntityManagerInterface $entityManager): Response
     {
+        // Vérifie si l'utilisateur connecté est l'auteur ou un admin
+        if (!$this->isGranted('ROLE_ADMIN') && $this->getUser() !== $article->getUser()) {
+        throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à supprimer cet article.');
+        }
+
         if ($this->isCsrfTokenValid('delete'.$article->getId(), $request->request->get('_token'))) {
             $entityManager->remove($article);
             $entityManager->flush();

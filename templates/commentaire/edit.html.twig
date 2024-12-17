@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier votre commentaire{% endblock %}
+
+{% block body %}
+    <h1>Modifier votre commentaire</h1>
+
+    {{ form_start(form) }}
+        <div class="form-group">
+            {{ form_label(form.contenu, 'Contenu du commentaire') }}
+            {{ form_widget(form.contenu, {'attr': {'class': 'form-control', 'rows': 5}}) }}
+        </div>
+        <button type="submit" class="btn btn-primary">Mettre à jour</button>
+    {{ form_end(form) }}
+
+    <a href="{{ path('article_show', { id: commentaire.article.id }) }}" class="btn btn-secondary mt-3">
+        Retour à l'article
+    </a>
+{% endblock %}

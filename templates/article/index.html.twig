@@ -3,20 +3,44 @@
 {% block title %}Liste des Articles{% endblock %}
 
 {% block body %}
-<h1>Liste des Articles</h1>
+<h1>
+    {% if currentCategory is defined %}
+        Articles dans la catégorie : {{ currentCategory.nom }}
+    {% else %}
+        Liste des Articles
+    {% endif %}
+</h1>
 
 <a href="{{ path('article_new') }}">Créer un nouvel article</a>
+
+<div>
+    <h2>Filtrer par catégorie :</h2>
+    <ul>
+        {% for category in categories %}
+            <li>
+                <a href="{{ path('article_by_category', { id: category.id }) }}">
+                    {{ category.nom }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<hr>
 
 <ul>
     {% for article in articles %}
         <li>
             <a href="{{ path('article_show', { id: article.id }) }}">{{ article.Titre }}</a>
-            <a href="{{ path('article_edit', { id: article.id }) }}">Modifier</a>
-            <form method="post" action="{{ path('article_delete', { id: article.id }) }}" style="display: inline;" onsubmit="return confirm('Voulez-vous vraiment supprimer cet article ?');">
-                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ article.id) }}">
-                <button type="submit">Supprimer</button>
-            </form>
+            {% if is_granted('ROLE_ADMIN') or app.user == article.user %}
+                <a href="{{ path('article_edit', { id: article.id }) }}">Modifier</a>
+                <form method="post" action="{{ path('article_delete', { id: article.id }) }}" style="display: inline;" onsubmit="return confirm('Voulez-vous vraiment supprimer cet article ?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ article.id) }}">
+                    <button type="submit">Supprimer</button>
+                </form>
+            {% endif %}
         </li>
     {% endfor %}
 </ul>
+
 {% endblock %}

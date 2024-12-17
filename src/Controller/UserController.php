@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Annotation\Route; // On importe l'annotation Route
 #[Route('/users')] // Cette annotation définit la route principale pour toutes les actions du contrôleur. Toutes les routes dans ce contrôleur commenceront par '/users'
 class UserController extends AbstractController // Déclaration de la classe UserController qui étend la classe AbstractController (la classe de base des contrôleurs Symfony)
 {
-    #[Route('/', name: 'user_index', methods: ['GET'])] // Cette annotation définit la route pour afficher la liste des utilisateurs. 'GET' signifie que cette route répondra aux requêtes HTTP GET (les requêtes pour obtenir des données)
+    #[Route('/list', name: 'user_index', methods: ['GET'])] // Cette annotation définit la route pour afficher la liste des utilisateurs. 'GET' signifie que cette route répondra aux requêtes HTTP GET (les requêtes pour obtenir des données)
     public function index(UserRepository $userRepository): Response // La méthode index() récupère tous les utilisateurs de la base de données via UserRepository et les affiche
     {
         $users = $userRepository->findAll(); // Appelle la méthode findAll() du UserRepository pour récupérer tous les utilisateurs dans la base de données

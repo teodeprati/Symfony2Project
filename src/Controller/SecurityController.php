@@ -22,6 +22,7 @@ class SecurityController extends AbstractController // Déclaration de la classe
             'last_username' => $lastUsername, // Transfert du dernier nom d'utilisateur à la vue pour l'affichage
             'error' => $error, // Transfert de l'erreur de connexion à la vue pour l'affichage
         ]);
+        
     }
 
     #[Route('/logout', name: 'app_logout')] // Annotation définissant la route '/logout' pour gérer la déconnexion des utilisateurs

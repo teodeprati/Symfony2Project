@@ -27,18 +27,20 @@ security:
       form_login:  # Authentification par formulaire
         login_path: app_login  # La route pour afficher le formulaire de connexion
         check_path: /login  # La route où les informations de connexion sont envoyées via une requête POST
-        default_target_path: /users  # Après une connexion réussie, l'utilisateur est redirigé vers la page /users
+        default_target_path: /article  # Après une connexion réussie, l'utilisateur est redirigé vers la page /users
       logout:  # Gestion de la déconnexion
         path: /logout  # La route pour se déconnecter
 
     # Configuration pour les API (commentée ici, mais peut être activée si nécessaire pour les connexions API basées sur JSON ou JWT)
-    # api_login:
-    #     pattern: ^/api/login  # Cette route serait spécifique aux API (connexion via API)
-    #     stateless: true  # Indique que l'API ne maintient pas de session (stateless)
-    #     json_login:  # Configuration pour une authentification JSON (souvent utilisée pour les APIs)
-    #         check_path: /api/login  # La route où les données de connexion sont envoyées
-    #         success_handler: lexik_jwt_authentication.handler.authentication_success  # Si la connexion réussit, la réponse JSON sera gérée ici
-    #         failure_handler: lexik_jwt_authentication.handler.authentication_failure  # Si la connexion échoue, la réponse JSON sera gérée ici
+    api_login:
+        pattern: ^/api/login  # Cette route serait spécifique aux API (connexion via API)
+        stateless: true  # Indique que l'API ne maintient pas de session (stateless)
+        json_login:  # Configuration pour une authentification JSON (souvent utilisée pour les APIs)
+            check_path: /api/login  # La route où les données de connexion sont envoyées
+            username_path: email
+            password_path: password
+            success_handler: lexik_jwt_authentication.handler.authentication_success  # Si la connexion réussit, la réponse JSON sera gérée ici
+            failure_handler: lexik_jwt_authentication.handler.authentication_failure  # Si la connexion échoue, la réponse JSON sera gérée ici
 
   # Configuration des contrôles d'accès (qui peut accéder à quelles routes en fonction de son rôle)
   access_control:
@@ -52,6 +54,11 @@ security:
     - { path: ^/users/new, roles: PUBLIC_ACCESS }  # La page /users/new (inscription) est publique (tout le monde peut y accéder)
 
     # Restreint l'accès à la page des utilisateurs (/users) uniquement aux utilisateurs complètement authentifiés
-    - { path: ^/users/admin, roles: IS_AUTHENTICATED_FULLY }  # L'accès à la page /users est restreint aux utilisateurs qui sont entièrement authentifiés
+    - { path: ^/users/list, roles: ROLE_ADMIN }  # L'accès à la page /users/list est restreint aux utilisateurs qui sont admin
 
     - { path: ^/categorie, roles: ROLE_ADMIN }
+
+    - { path: ^/article/, roles: PUBLIC_ACCESS }
+
+    - { path: ^/article/new, roles: IS_AUTHENTICATED_FULLY }
+
