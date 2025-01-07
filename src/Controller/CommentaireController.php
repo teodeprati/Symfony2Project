@@ -44,37 +44,37 @@ class CommentaireController extends AbstractController
 
 
     #[Route('/edit/{id}', name: 'edit', methods: ['GET', 'POST'])]
-public function edit(Request $request, Commentaire $commentaire, EntityManagerInterface $entityManager): Response
-{
-    $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+    public function edit(Request $request, Commentaire $commentaire, EntityManagerInterface $entityManager): Response
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
-    if ($commentaire->getAuteur() !== $this->getUser() && !$this->isGranted('ROLE_ADMIN')) {
-        throw $this->createAccessDeniedException('Vous ne pouvez pas modifier ce commentaire.');
+        if ($commentaire->getAuteur() !== $this->getUser() && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException('Vous ne pouvez pas modifier ce commentaire.');
+        }
+
+        // Crée un formulaire pour modifier le commentaire
+        $form = $this->createFormBuilder($commentaire)
+            ->add('contenu', TextareaType::class, [
+                'label' => 'Contenu du commentaire',
+                'attr' => ['class' => 'form-control', 'rows' => 5],
+            ])
+            ->add('submit', SubmitType::class, ['label' => 'Mettre à jour', 'attr' => ['class' => 'btn btn-primary']])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+            $this->addFlash('success', 'Commentaire modifié avec succès.');
+
+            return $this->redirectToRoute('article_show', ['id' => $commentaire->getArticle()->getId()]);
+        }
+
+        return $this->render('/commentaire/edit.html.twig', [
+            'form' => $form->createView(),
+            'commentaire' => $commentaire,
+        ]);
     }
-
-    // Crée un formulaire pour modifier le commentaire
-    $form = $this->createFormBuilder($commentaire)
-        ->add('contenu', TextareaType::class, [
-            'label' => 'Contenu du commentaire',
-            'attr' => ['class' => 'form-control', 'rows' => 5],
-        ])
-        ->add('submit', SubmitType::class, ['label' => 'Mettre à jour', 'attr' => ['class' => 'btn btn-primary']])
-        ->getForm();
-
-    $form->handleRequest($request);
-
-    if ($form->isSubmitted() && $form->isValid()) {
-        $entityManager->flush();
-        $this->addFlash('success', 'Commentaire modifié avec succès.');
-
-        return $this->redirectToRoute('article_show', ['id' => $commentaire->getArticle()->getId()]);
-    }
-
-    return $this->render('/commentaire/edit.html.twig', [
-        'form' => $form->createView(),
-        'commentaire' => $commentaire,
-    ]);
-}
 
 
     #[Route('/delete/{id}', name: 'delete', methods: ['POST'])]
