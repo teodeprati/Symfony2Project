@@ -20,10 +20,10 @@ class CommentaireController extends AbstractController
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
-        $commentaire = new Commentaire();
-        $commentaire->setArticle($article);
-        $commentaire->setAuteur($this->getUser());
-        $commentaire->setCreatedAt(new \DateTimeImmutable());
+        $commentaire = new Commentaire(); // Crée une nouvelle instance de l'entité `Commentaire`
+        $commentaire->setArticle($article); // relation entre `Commentaire` et `Article`
+        $commentaire->setAuteur($this->getUser()); // relation entre `Commentaire` et `User`
+        $commentaire->setCreatedAt(new \DateTimeImmutable());// Définit la date de création du commentaire avec l'heure actuelle
 
         // Récupère directement la valeur "contenu"
         $contenu = $request->request->get('contenu');
@@ -31,15 +31,15 @@ class CommentaireController extends AbstractController
         if ($contenu) {
             $commentaire->setContenu($contenu);
 
-            $entityManager->persist($commentaire);
-            $entityManager->flush();
+            $entityManager->persist($commentaire); // Marque l'objet `Commentaire` pour être ajouté à la base de données.
+            $entityManager->flush(); // Exécute les requêtes SQL pour sauvegarder le commentaire en base.
 
             $this->addFlash('success', 'Votre commentaire a bien été ajouté.');
         } else {
             $this->addFlash('error', 'Le commentaire ne peut pas être vide.');
         }
 
-        return $this->redirectToRoute('article_show', ['id' => $article->getId()]);
+        return $this->redirectToRoute('article_show', ['id' => $article->getId()]); // l'ID de l'article concerné
     }
 
 
