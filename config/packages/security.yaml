@@ -22,7 +22,7 @@ security:
 
 # Configuration pour les API (commentée ici, mais peut être activée si nécessaire pour les connexions API basées sur JSON ou JWT)
     api_login:
-        pattern: ^/api/login  # Cette route serait spécifique aux API (connexion via API)
+        pattern: ^/api/login # Cette route serait spécifique aux API (connexion via API)
         stateless: true  # Indique que l'API ne maintient pas de session (stateless)
         json_login:  # Configuration pour une authentification JSON (souvent utilisée pour les APIs)
             check_path: /api/login  # La route où les données de connexion sont envoyées
@@ -61,4 +61,17 @@ security:
     - { path: ^/article/, roles: PUBLIC_ACCESS }
 
     - { path: ^/article/new, roles: IS_AUTHENTICATED_FULLY }
+
+    # - { path: ^/api/login, roles: PUBLIC_ACCESS }
+
+    # - { path: ^/api/admin, roles: ROLE_ADMIN }
+
+monolog:
+    channels: ['security']
+    handlers:
+        security:
+            type: stream
+            path: "%kernel.logs_dir%/security.log"
+            level: debug
+
 
