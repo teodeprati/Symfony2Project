@@ -5,6 +5,15 @@
 {% block body %}
 <h1>{{ article.titre }}</h1>
 
+{# Vérifie si une image est associée à l'article et l'affiche #}
+{% if article.image %}
+    <div>
+        <img src="{{ asset('uploads/images/' ~ article.image) }}" alt="Image de l'article" style="max-width: 500px; height: auto;">
+    </div>
+{% else %}
+    <p><em>Aucune image disponible.</em></p>
+{% endif %}
+
 <p><strong>Contenu :</strong></p>
 <p>{{ article.content }}</p>
 

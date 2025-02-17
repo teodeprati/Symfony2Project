@@ -12,15 +12,12 @@ class AuthController extends AbstractController
     #[Route('/api/login', name: 'api_login', methods: ['POST'])]
     public function login(UserInterface $user): JsonResponse
     {
-        // Récupère le token généré par LexikJWTAuthenticationBundle
-        $token = $this->getTokenFromRequest();
-
         // Retourne la réponse avec le token et les informations de l'utilisateur
         return new JsonResponse([
             'token' => $token,
             'user' => [
                 'id' => $user->getId(),
-                'username' => $user->getName(),
+                'username' => $user->getUsername(),
                 'roles' => $user->getRoles() // Inclut les rôles de l'utilisateur
             ]
         ]);

@@ -31,6 +31,10 @@
 <ul>
     {% for article in articles %}
         <li>
+            {# Affichage de l'image si disponible #}
+            {% if article.image %}
+                <img src="{{ asset('uploads/images/' ~ article.image) }}" alt="Image de l'article" style="max-width: 150px; height: auto;">
+            {% endif %}
             <a href="{{ path('article_show', { id: article.id }) }}">{{ article.Titre }}</a>
             {% if is_granted('ROLE_ADMIN') or app.user == article.user %}
                 <a href="{{ path('article_edit', { id: article.id }) }}">Modifier</a>

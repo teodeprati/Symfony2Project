@@ -23,6 +23,12 @@ class Article
     #[ORM\Column(type: Types::TEXT)]
     private ?string $content = null;
 
+    #[ORM\Column(type: "datetime")]
+    private ?\DateTimeInterface $createdAt = null;
+
+    #[ORM\Column(type: "string", length: 255, nullable: true)]
+    private ?string $image = null;
+
     /**
      * @var Collection<int, Categorie>
      */
@@ -43,6 +49,8 @@ class Article
     {
         $this->categories = new ArrayCollection();
         $this->commentaires = new ArrayCollection();
+        // Définir une date de création par défaut
+        $this->createdAt = new \DateTime();
     }
 
     public function getId(): ?int
@@ -71,6 +79,28 @@ class Article
     {
         $this->content = $content;
 
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): static
+    {
+        $this->image = $image;
         return $this;
     }
 

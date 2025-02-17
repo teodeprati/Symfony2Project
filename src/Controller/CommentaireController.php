@@ -13,6 +13,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Psr\Log\LoggerInterface;
 
 #[Route('/comment', name: 'comment_')]
 class CommentaireController extends AbstractController
@@ -119,26 +120,33 @@ class CommentaireController extends AbstractController
     }
 
     #[Route('/api/delete/{id}', name: 'api_commentaire_delete', methods: ['DELETE'])]
-    public function apiDelete(int $id, CommentaireRepository $commentaireRepository, EntityManagerInterface $entityManager): JsonResponse
+    public function apiDelete(int $id, CommentaireRepository $commentaireRepository, EntityManagerInterface $entityManager, LoggerInterface $logger): JsonResponse
     {
+        $logger->info('Accès à la route /api/delete/{id}', ['id' => $id]);
+    
+        // Vérifie que l'utilisateur est authentifié
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
-
+    
+        // Vérifie que l'utilisateur est bien récupéré
+        $user = $this->getUser();
+        $logger->info('Utilisateur authentifié', ['user' => $user ? $user->getUsername() : 'null']);
+    
         // Récupère le commentaire à supprimer
         $commentaire = $commentaireRepository->find($id);
-
+    
         if (!$commentaire) {
             return new JsonResponse(['error' => 'Commentaire non trouvé'], 404);
         }
-
+    
         // Vérifie que l'utilisateur est l'auteur du commentaire ou un admin
-        if ($commentaire->getAuteur() !== $this->getUser() && !$this->isGranted('ROLE_ADMIN')) {
+        if ($commentaire->getAuteur() !== $user && !$this->isGranted('ROLE_ADMIN')) {
             return new JsonResponse(['error' => 'Vous ne pouvez pas supprimer ce commentaire.'], 403);
         }
-
+    
         // Supprime le commentaire
         $entityManager->remove($commentaire);
         $entityManager->flush();
-
+    
         return new JsonResponse(['message' => 'Commentaire supprimé avec succès']);
     }
 

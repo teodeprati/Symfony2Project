@@ -21,15 +21,21 @@ security:
       security: false  # Pas de sécurité appliquée sur ces routes (les utilisateurs peuvent y accéder sans être authentifiés)
 
 # Configuration pour les API (commentée ici, mais peut être activée si nécessaire pour les connexions API basées sur JSON ou JWT)
-    api_login:
-        pattern: ^/api/login # Cette route serait spécifique aux API (connexion via API)
-        stateless: true  # Indique que l'API ne maintient pas de session (stateless)
-        json_login:  # Configuration pour une authentification JSON (souvent utilisée pour les APIs)
-            check_path: /api/login  # La route où les données de connexion sont envoyées
-            username_path: email
-            password_path: password
-            success_handler: lexik_jwt_authentication.handler.authentication_success  # Si la connexion réussit, la réponse JSON sera gérée ici
-            failure_handler: lexik_jwt_authentication.handler.authentication_failure  # Si la connexion échoue, la réponse JSON sera gérée ici
+    api:
+      pattern: ^/api/login
+      stateless: true
+      json_login:
+        check_path: /api/login  # La route où les identifiants sont envoyés
+        username_path: email          # Le champ JSON pour l'email
+        password_path: password       # Le champ JSON pour le mot de passe
+        success_handler: lexik_jwt_authentication.handler.authentication_success  # Gestionnaire de succès (pour JWT)
+        failure_handler: lexik_jwt_authentication.handler.authentication_failure  # Gestionnaire d'échec
+      # jwt: ~  # Active la vérification des tokens JWT pour les autres routes
+    
+    api_delete:
+      pattern: ^/comment/api/delete
+      stateless: true
+      jwt: ~  # Active la vérification des tokens JWT pour cette route
 
     # Configuration principale du firewall pour toutes les autres routes
     main:
@@ -61,6 +67,10 @@ security:
     - { path: ^/article/, roles: PUBLIC_ACCESS }
 
     - { path: ^/article/new, roles: IS_AUTHENTICATED_FULLY }
+
+    - { path: ^/api/login, roles: PUBLIC_ACCESS }  # La route de login est publique
+
+    - { path: ^/comment/api/delete, roles: IS_AUTHENTICATED_FULLY }  # Toutes les autres routes API nécessitent une authentification
 
     # - { path: ^/api/login, roles: PUBLIC_ACCESS }
 
