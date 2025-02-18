@@ -14,6 +14,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Psr\Log\LoggerInterface;
+use App\Form\CommentaireType;
 
 #[Route('/comment', name: 'comment_')]
 class CommentaireController extends AbstractController
@@ -56,13 +57,7 @@ class CommentaireController extends AbstractController
         }
 
         // Crée un formulaire pour modifier le commentaire
-        $form = $this->createFormBuilder($commentaire)
-            ->add('contenu', TextareaType::class, [
-                'label' => 'Contenu du commentaire',
-                'attr' => ['class' => 'form-control', 'rows' => 5],
-            ])
-            ->add('submit', SubmitType::class, ['label' => 'Mettre à jour', 'attr' => ['class' => 'btn btn-primary']])
-            ->getForm();
+        $form = $this->createForm(CommentaireType::class, $commentaire);
 
         $form->handleRequest($request);
 

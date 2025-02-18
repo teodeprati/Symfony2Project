@@ -21,14 +21,11 @@ use Symfony\Component\HttpFoundation\Request;
 // Importation de la classe Response pour créer des réponses HTTP à retourner au client.
 use Symfony\Component\HttpFoundation\Response;
 
-// Importation de types spécifiques pour construire des formulaires, ici un champ texte.
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-
-// Importation de types spécifiques pour construire des formulaires, ici un bouton de soumission.
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-
 // Importation de l'annotation Route pour définir les routes associées aux actions du contrôleur.
 use Symfony\Component\Routing\Annotation\Route;
+
+// Importation du formulaire CategorieType pour la création et l'édition de catégories.
+use App\Form\CategorieType;
 
 // Définition de la route principale du contrôleur avec un préfixe pour toutes les routes associées.
 #[Route('/categorie', name: 'categorie_')]
@@ -60,15 +57,8 @@ class CategorieController extends AbstractController
         // Crée une nouvelle instance de l'entité Categorie.
         $categorie = new Categorie();
 
-        // Crée un formulaire basé sur l'objet $categorie. Ajoute un champ "nom" (texte) et un bouton de soumission.
-        $form = $this->createFormBuilder($categorie)
-            ->add('nom', TextType::class, [ // Définit un champ de type texte pour le nom de la catégorie.
-                'label' => 'Nom de la catégorie', // Texte affiché pour le champ dans le formulaire.
-            ])
-            ->add('save', SubmitType::class, [ // Ajoute un bouton de soumission au formulaire.
-                'label' => 'Créer la catégorie', // Texte affiché sur le bouton.
-            ])
-            ->getForm(); // Génère le formulaire final.
+        // Crée un formulaire basé sur l'objet $categorie.
+        $form = $this->createForm(CategorieType::class, $categorie);
 
         // Traite la requête HTTP pour vérifier si le formulaire a été soumis et récupérer ses données.
         $form->handleRequest($request);
@@ -111,15 +101,8 @@ class CategorieController extends AbstractController
         // Vérifie que l'utilisateur connecté possède le rôle ADMIN avant d'accéder à cette action.
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
-        // Crée un formulaire pour modifier les données de l'entité $categorie.
-        $form = $this->createFormBuilder($categorie)
-            ->add('nom', TextType::class, [ // Champ texte pour modifier le nom de la catégorie.
-                'label' => 'Nom de la catégorie', // Texte affiché pour le champ dans le formulaire.
-            ])
-            ->add('save', SubmitType::class, [ // Bouton pour soumettre les modifications.
-                'label' => 'Mettre à jour la catégorie', // Texte affiché sur le bouton.
-            ])
-            ->getForm(); // Génère le formulaire final.
+        // Crée un formulaire pour modifier la catégorie.
+        $form = $this->createForm(CategorieType::class, $categorie);
 
         // Traite la requête HTTP pour vérifier si le formulaire a été soumis et récupérer ses données.
         $form->handleRequest($request);
