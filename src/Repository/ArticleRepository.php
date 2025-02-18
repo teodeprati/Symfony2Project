@@ -29,4 +29,17 @@ class ArticleRepository extends ServiceEntityRepository
                 ->getQuery()
                 ->getResult();
         }
+
+    public function findBySearch(string $search = null)
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->orderBy('a.createdAt', 'DESC');
+
+        if ($search) {
+            $qb->andWhere('LOWER(a.titre) LIKE LOWER(:search) OR LOWER(a.content) LIKE LOWER(:search)')
+               ->setParameter('search', '%' . $search . '%');
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }

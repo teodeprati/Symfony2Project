@@ -37,13 +37,19 @@ class ArticleController extends AbstractController
     // }
 
     #[Route('/', name: 'index', methods: ['GET'])]
-    public function userIndex(ArticleRepository $articleRepository, EntityManagerInterface $entityManager): Response
+    public function userIndex(Request $request, ArticleRepository $articleRepository, EntityManagerInterface $entityManager): Response
     {
+        // Récupérer le terme de recherche
+        $search = $request->query->get('search');
+
         // Récupérer toutes les catégories
         $categories = $entityManager->getRepository(Categorie::class)->findAll();
 
+        // Récupérer les articles en fonction de la recherche
+        $articles = $articleRepository->findBySearch($search);
+
         return $this->render('article/index.html.twig', [
-            'articles' => $articleRepository->findAll(),
+            'articles' => $articles,
             'categories' => $categories,
         ]);
     }
