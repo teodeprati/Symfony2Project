@@ -33,7 +33,7 @@
 {% for commentaire in article.commentaires %}
     <div>
         <p>
-            <strong>{{ commentaire.auteur.name }} :</strong> {{ commentaire.contenu }}<br>
+            <strong>{{ commentaire.auteur.username }} :</strong> {{ commentaire.contenu }}<br>
             <small>Posté le {{ commentaire.createdAt|date('d/m/Y H:i') }}</small>
         </p>
 

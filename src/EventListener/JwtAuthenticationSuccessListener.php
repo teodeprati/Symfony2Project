@@ -20,7 +20,7 @@ class JwtAuthenticationSuccessListener
         // Ajoute des informations supplémentaires à la réponse
         $data['user'] = [
             'id' => $user->getId(),
-            'username' => $user->getName(),
+            'username' => $user->getUsername(),
             'roles' => $user->getRoles(), // Inclut les rôles de l'utilisateur
         ];
 

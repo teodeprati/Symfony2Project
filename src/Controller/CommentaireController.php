@@ -105,7 +105,7 @@ class CommentaireController extends AbstractController
             $data[] = [
                 'id' => $commentaire->getId(),
                 'contenu' => $commentaire->getContenu(),
-                'auteur' => $commentaire->getAuteur()->getName(), // Renvoie uniquement le nom d'utilisateur sinon je vais avoir un objet auteur avec toutes les info de l'auteur
+                'auteur' => $commentaire->getAuteur()->getUsername(), // Renvoie uniquement le nom d'utilisateur sinon je vais avoir un objet auteur avec toutes les info de l'auteur
                 'dateCreation' => $commentaire->getCreatedAt()->format('Y-m-d H:i:s'),
             ];
         }

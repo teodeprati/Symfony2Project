@@ -11,10 +11,10 @@ use Symfony\Component\HttpFoundation\Request; // Importation de la classe Reques
 use Symfony\Component\HttpFoundation\Response; // Importation de la classe Response qui est utilisée pour envoyer une réponse HTTP
 use Symfony\Component\Routing\Annotation\Route; // On importe l'annotation Route, qui permet de définir des routes pour ce contrôleur
  
-#[Route('/users')] // Cette annotation définit la route principale pour toutes les actions du contrôleur. Toutes les routes dans ce contrôleur commenceront par '/users'
+
 class UserController extends AbstractController // Déclaration de la classe UserController qui étend la classe AbstractController (la classe de base des contrôleurs Symfony)
 {
-    #[Route('/list', name: 'user_index', methods: ['GET'])] // Cette annotation définit la route pour afficher la liste des utilisateurs. 'GET' signifie que cette route répondra aux requêtes HTTP GET (les requêtes pour obtenir des données)
+    #[Route('/userlist', name: 'user_index', methods: ['GET'])] // Cette annotation définit la route pour afficher la liste des utilisateurs. 'GET' signifie que cette route répondra aux requêtes HTTP GET (les requêtes pour obtenir des données)
     public function index(UserRepository $userRepository): Response // La méthode index() récupère tous les utilisateurs de la base de données via UserRepository et les affiche
     {
         $users = $userRepository->findAll(); // Appelle la méthode findAll() du UserRepository pour récupérer tous les utilisateurs dans la base de données
@@ -22,14 +22,14 @@ class UserController extends AbstractController // Déclaration de la classe Use
         return $this->render('user/index.html.twig', ['users' => $users]); // Rendu de la vue 'user/index.html.twig', avec la liste des utilisateurs passée à la vue
     }
 
-    #[Route('/new', name: 'user_new', methods: ['GET', 'POST'])] // La route '/new' pour afficher le formulaire de création et traiter l'envoi du formulaire
+    #[Route('/register', name: 'user_new', methods: ['GET', 'POST'])] // La route '/new' pour afficher le formulaire de création et traiter l'envoi du formulaire
     public function new(Request $request, EntityManagerInterface $em): Response // La méthode new() gère l'affichage et la création de nouveaux utilisateurs
     {
         if ($request->isMethod('POST')) { // Si la méthode de la requête est POST (c'est-à-dire que le formulaire a été soumis)
             $user = new User(); // On crée une nouvelle instance de l'entité User
 
             // On récupère les données soumises dans le formulaire et on les attribue à l'entité $user
-            $user->setName($request->request->get('name')); // Attribue le nom de l'utilisateur depuis la requête
+            $user->setUsername($request->request->get('username')); // Attribue le nom de l'utilisateur depuis la requête
             $user->setEmail($request->request->get('email')); // Attribue l'email depuis la requête
 
             // Hachage du mot de passe avant de le sauvegarder dans la base de données
@@ -53,7 +53,7 @@ class UserController extends AbstractController // Déclaration de la classe Use
     {
         if ($request->isMethod('POST')) { // Si la requête est de type POST (formulaire soumis)
             // Récupère et met à jour les informations de l'utilisateur
-            $user->setName($request->request->get('name')); // Modifie le nom de l'utilisateur
+            $user->setUsername($request->request->get('username')); // Modifie le nom de l'utilisateur
             $user->setEmail($request->request->get('email')); // Modifie l'email de l'utilisateur
 
             $role = $request->request->get('role', 'ROLE_USER'); // Récupère et met à jour le rôle de l'utilisateur
