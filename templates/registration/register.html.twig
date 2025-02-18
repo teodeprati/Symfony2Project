@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h1 class="card-title text-center mb-4">Inscription</h1>
+
+                        {% for flash_error in app.flashes('verify_email_error') %}
+                            <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+                        {% endfor %}
+
+                        {{ form_start(registrationForm, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                        
+                        <div class="mb-3">
+                            {{ form_label(registrationForm.username) }}
+                            {{ form_widget(registrationForm.username) }}
+                            {% if form_errors(registrationForm.username) %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form_errors(registrationForm.username) }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(registrationForm.email) }}
+                            {{ form_widget(registrationForm.email) }}
+                            {% if form_errors(registrationForm.email) %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form_errors(registrationForm.email) }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(registrationForm.plainPassword) }}
+                            {{ form_widget(registrationForm.plainPassword) }}
+                            {% if form_errors(registrationForm.plainPassword) %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form_errors(registrationForm.plainPassword) }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">
+                                Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre.
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form_widget(registrationForm.agreeTerms) }}
+                                {{ form_label(registrationForm.agreeTerms, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                            </div>
+                            {% if form_errors(registrationForm.agreeTerms) %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form_errors(registrationForm.agreeTerms) }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">S'inscrire</button>
+                        </div>
+
+                        {{ form_end(registrationForm) }}
+
+                        <div class="mt-3 text-center">
+                            <p>Déjà inscrit ? <a href="{{ path('app_login') }}">Connectez-vous</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

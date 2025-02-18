@@ -10,8 +10,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController; // Importation
 use Symfony\Component\HttpFoundation\Request; // Importation de la classe Request qui gère les données envoyées dans la requête HTTP
 use Symfony\Component\HttpFoundation\Response; // Importation de la classe Response qui est utilisée pour envoyer une réponse HTTP
 use Symfony\Component\Routing\Annotation\Route; // On importe l'annotation Route, qui permet de définir des routes pour ce contrôleur
- 
+use Symfony\Component\Security\Core\Exception\AccessDeniedException; // Importation de l'exception AccessDeniedException
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface; // Importation de l'interface UserPasswordHasherInterface
 
+#[Route('/admin/user')]
+#[IsGranted('ROLE_ADMIN')]
 class UserController extends AbstractController // Déclaration de la classe UserController qui étend la classe AbstractController (la classe de base des contrôleurs Symfony)
 {
     #[Route('/userlist', name: 'user_index', methods: ['GET'])] // Cette annotation définit la route pour afficher la liste des utilisateurs. 'GET' signifie que cette route répondra aux requêtes HTTP GET (les requêtes pour obtenir des données)
@@ -23,7 +26,7 @@ class UserController extends AbstractController // Déclaration de la classe Use
     }
 
     #[Route('/register', name: 'user_new', methods: ['GET', 'POST'])] // La route '/new' pour afficher le formulaire de création et traiter l'envoi du formulaire
-    public function new(Request $request, EntityManagerInterface $em): Response // La méthode new() gère l'affichage et la création de nouveaux utilisateurs
+    public function new(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher): Response // La méthode new() gère l'affichage et la création de nouveaux utilisateurs
     {
         if ($request->isMethod('POST')) { // Si la méthode de la requête est POST (c'est-à-dire que le formulaire a été soumis)
             $user = new User(); // On crée une nouvelle instance de l'entité User
@@ -33,7 +36,7 @@ class UserController extends AbstractController // Déclaration de la classe Use
             $user->setEmail($request->request->get('email')); // Attribue l'email depuis la requête
 
             // Hachage du mot de passe avant de le sauvegarder dans la base de données
-            $hashedPassword = password_hash($request->request->get('password'), PASSWORD_BCRYPT); // Utilise bcrypt pour sécuriser le mot de passe
+            $hashedPassword = $passwordHasher->hashPassword($user, $request->request->get('password')); // Utilise bcrypt pour sécuriser le mot de passe
             $user->setPassword($hashedPassword); // On attribue le mot de passe haché à l'utilisateur
 
             $role = $request->request->get('role', 'ROLE_USER'); // On récupère le rôle du formulaire. Par défaut, il sera 'ROLE_USER'
