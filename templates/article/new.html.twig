@@ -3,12 +3,92 @@
 {% block title %}Créer un Article{% endblock %}
 
 {% block body %}
-<h1>Créer un Article</h1>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary">
+                    <h2 class="h4 mb-0 text-white">
+                        <i class="fas fa-edit me-2"></i>Créer un Article
+                    </h2>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+                        <div class="mb-4">
+                            {{ form_label(form.titre, 'Titre de l\'article', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                            {{ form_widget(form.titre, {
+                                'attr': {
+                                    'class': 'form-control',
+                                    'placeholder': 'Entrez le titre de votre article'
+                                }
+                            }) }}
+                        </div>
 
-{{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button type="submit">Enregistrer</button>
-{{ form_end(form) }}
+                        <div class="mb-4">
+                            {{ form_label(form.Categories, 'Catégories', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                            {{ form_widget(form.Categories, {
+                                'attr': {
+                                    'class': 'form-select',
+                                    'data-placeholder': 'Sélectionnez une ou plusieurs catégories'
+                                }
+                            }) }}
+                            <div class="form-text">Vous pouvez sélectionner plusieurs catégories</div>
+                        </div>
 
-<a href="{{ path('article_index') }}">Retour à la liste</a>
+                        <div class="mb-4">
+                            {{ form_label(form.content, 'Contenu', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                            {{ form_widget(form.content, {
+                                'attr': {
+                                    'class': 'form-control',
+                                    'rows': 10,
+                                    'placeholder': 'Rédigez votre article ici...'
+                                }
+                            }) }}
+                        </div>
+
+                        {% if form.imageFile is defined %}
+                        <div class="mb-4">
+                            {{ form_label(form.imageFile, 'Image', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                            {{ form_widget(form.imageFile, {
+                                'attr': {
+                                    'class': 'form-control'
+                                }
+                            }) }}
+                            <div class="form-text">Formats acceptés : JPG, PNG</div>
+                        </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-between border-top pt-4">
+                            <a href="{{ path('article_index') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Retour
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Publier
+                            </button>
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .card {
+        border-radius: 8px;
+    }
+    .card-header {
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+    .form-control:focus, .form-select:focus {
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+    }
+    .btn {
+        padding: 0.5rem 1.5rem;
+    }
+</style>
 {% endblock %}

@@ -3,70 +3,189 @@
 {% block title %}{{ article.titre }}{% endblock %}
 
 {% block body %}
-<h1>{{ article.titre }}</h1>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Article Header -->
+            <div class="article-header mb-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h1 class="display-4">{{ article.titre }}</h1>
+                    {% if is_granted('ROLE_ADMIN') or app.user == article.user %}
+                        <div class="d-flex gap-2">
+                            <a href="{{ path('article_edit', { id: article.id }) }}" class="btn btn-primary">
+                                <i class="fas fa-edit me-2"></i>Modifier
+                            </a>
+                            <form method="post" action="{{ path('article_delete', { id: article.id }) }}" class="d-inline" 
+                                  onsubmit="return confirm('Voulez-vous vraiment supprimer cet article ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ article.id) }}">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-trash me-2"></i>Supprimer
+                                </button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="article-meta text-muted mb-4">
+                    <span><i class="fas fa-user me-2"></i>{{ article.user.username }}</span>
+                    <span class="mx-3">|</span>
+                    <span><i class="fas fa-calendar-alt me-2"></i>{{ article.createdAt|date('d/m/Y') }}</span>
+                </div>
+            </div>
 
-{# Vérifie si une image est associée à l'article et l'affiche #}
-{% if article.image %}
-    <div>
-        <img src="{{ asset('uploads/images/' ~ article.image) }}" alt="Image de l'article" style="max-width: 500px; height: auto;">
+            <!-- Article Image -->
+            {% if article.image %}
+                <div class="article-image mb-4">
+                    <img src="{{ asset('uploads/images/' ~ article.image) }}" 
+                         alt="Image de l'article" 
+                         class="img-fluid rounded shadow-sm">
+                </div>
+            {% endif %}
+
+            <!-- Categories -->
+            {% if article.categories is not empty %}
+                <div class="article-categories mb-4">
+                    {% for categorie in article.categories %}
+                        <span class="badge bg-primary me-2">{{ categorie.nom }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Article Content -->
+            <div class="article-content mb-5">
+                {{ article.content|nl2br }}
+            </div>
+
+            <!-- Article Actions -->
+            <div class="article-actions mb-5 pt-3 border-top">
+                <a href="{{ path('article_index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Retour aux articles
+                </a>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="comments-section mt-5">
+                <h3 class="h4 mb-4">
+                    <i class="fas fa-comments me-2"></i>
+                    Commentaires ({{ article.commentaires|length }})
+                </h3>
+
+                {% if article.commentaires is empty %}
+                    <div class="alert alert-light text-center">
+                        Aucun commentaire pour le moment. Soyez le premier à commenter !
+                    </div>
+                {% endif %}
+
+                <!-- Comments List -->
+                <div class="comments-list">
+                    {% for commentaire in article.commentaires %}
+                        <div class="comment-item card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="comment-content">
+                                        <h6 class="mb-1">{{ commentaire.auteur.username }}</h6>
+                                        <p class="mb-1">{{ commentaire.contenu }}</p>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock me-1"></i>
+                                            {{ commentaire.createdAt|date('d/m/Y H:i') }}
+                                        </small>
+                                    </div>
+                                    {% if app.user == commentaire.auteur or is_granted('ROLE_ADMIN') %}
+                                        <div class="comment-actions">
+                                            <div class="btn-group">
+                                                <a href="{{ path('comment_edit', { id: commentaire.id }) }}" 
+                                                   class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-edit me-1"></i>Modifier
+                                                </a>
+                                                <form method="post" action="{{ path('comment_delete', { id: commentaire.id }) }}" 
+                                                      class="d-inline">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ commentaire.id) }}">
+                                                    <button type="submit" class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-trash me-1"></i>Supprimer
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- New Comment Form -->
+                {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                    <div class="card mt-4">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Ajouter un commentaire</h5>
+                            <form method="post" action="{{ path('comment_new', { id: article.id }) }}">
+                                <div class="mb-3">
+                                    <textarea name="contenu" class="form-control" rows="3" 
+                                              placeholder="Votre commentaire..." required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane me-2"></i>Envoyer
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info mt-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <a href="{{ path('app_login') }}" class="alert-link">Connectez-vous</a> 
+                        pour ajouter un commentaire.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
     </div>
-{% else %}
-    <p><em>Aucune image disponible.</em></p>
-{% endif %}
+</div>
+{% endblock %}
 
-<p><strong>Contenu :</strong></p>
-<p>{{ article.content }}</p>
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .article-header h1 {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+    
+    .article-meta {
+        font-size: 0.95rem;
+    }
+    
+    .article-content {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: #2c3e50;
+    }
+    
+    .article-image img {
+        width: 100%;
+        max-height: 500px;
+        object-fit: cover;
+    }
+    
+    .comment-item {
+        transition: transform 0.2s ease;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .comment-item:hover {
+        transform: translateX(5px);
+    }
+    
+    .badge {
+        padding: 0.5em 1em;
+        font-weight: 500;
+    }
 
-{% if article.categories is not empty %}
-    <p><strong>Catégories :</strong></p>
-    <ul>
-        {% for categorie in article.categories %}
-            <li>{{ categorie.nom }}</li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p><em>Aucune catégorie associée.</em></p>
-{% endif %}
+    .btn-group .btn {
+        border-radius: 4px;
+    }
 
-<h2>Commentaires</h2>
-
-{% for commentaire in article.commentaires %}
-    <div>
-        <p>
-            <strong>{{ commentaire.auteur.username }} :</strong> {{ commentaire.contenu }}<br>
-            <small>Posté le {{ commentaire.createdAt|date('d/m/Y H:i') }}</small>
-        </p>
-
-        {% if app.user == commentaire.auteur or is_granted('ROLE_ADMIN') %}
-            <a href="{{ path('comment_edit', { id: commentaire.id }) }}">Modifier</a>
-            <form method="post" action="{{ path('comment_delete', { id: commentaire.id }) }}" style="display:inline;">
-                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ commentaire.id) }}">
-                <button type="submit">Supprimer</button>
-            </form>
-        {% endif %}
-    </div>
-    <hr>
-{% endfor %}
-
-{% if is_granted('IS_AUTHENTICATED_FULLY') %}
-    <h3>Ajouter un commentaire</h3>
-    <form method="post" action="{{ path('comment_new', { id: article.id }) }}">
-        <textarea name="contenu" required placeholder="Votre commentaire"></textarea>
-        <button type="submit">Envoyer</button>
-    </form>
-{% else %}
-    <p><a href="{{ path('app_login') }}">Connectez-vous</a> pour ajouter un commentaire.</p>
-{% endif %}
-
-
-<a href="{{ path('article_index') }}">Retour à la liste des articles</a>
-
-{# Vérifie si l'utilisateur est admin ou l'auteur de l'article #}
-{% if is_granted('ROLE_ADMIN') or app.user == article.user %}
-    <a href="{{ path('article_edit', { id: article.id }) }}">Modifier cet article</a>
-    <form method="post" action="{{ path('article_delete', { id: article.id }) }}" style="display: inline;" onsubmit="return confirm('Voulez-vous vraiment supprimer cet article ?');">
-        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ article.id) }}">
-        <button type="submit" class="btn btn-danger">Supprimer</button>
-    </form>
-{% endif %}
+    .btn-group .btn:not(:last-child) {
+        margin-right: 0.5rem;
+    }
+</style>
 {% endblock %}
