@@ -1,0 +1,6 @@
+projectKey=ProjectSymfo
+serverUrl=http://localhost:9000
+serverVersion=24.12.0.100206
+dashboardUrl=http://localhost:9000/dashboard?id=ProjectSymfo
+ceTaskId=db2ba187-78a3-41ab-86ba-37f301835ac0
+ceTaskUrl=http://localhost:9000/api/ce/task?id=db2ba187-78a3-41ab-86ba-37f301835ac0

@@ -11,8 +11,10 @@
                 <label for="password">Mot de passe</label>
                 <input type="password" id="password" name="_password" class="form-control" required>
             </div>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
             <button type="submit" class="btn btn-primary mt-3">Se connecter</button>
 
+            <a href="{{ path('app_forgot_password_request') }}">Mot de passe oublié ?</a>
 
         </form>
         {% if error %}

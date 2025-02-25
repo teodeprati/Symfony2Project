@@ -1,0 +1,84 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Profil{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Informations de l'utilisateur -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">{{ user.username }}</h2>
+                    <p class="text-muted">{{ user.email }}</p>
+                    <hr>
+                    <div class="mb-3">
+                        <strong>Rôle:</strong>
+                        {% if 'ROLE_ADMIN' in user.roles %}
+                            <span class="badge bg-danger">Administrateur</span>
+                        {% else %}
+                            <span class="badge bg-primary">Utilisateur</span>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Nombre d'articles:</strong><br>
+                        {{ user.articles|length }}
+                    </div>
+                    <div class="mt-3">
+                        <a href="{{ path('user_profile_edit') }}" class="btn btn-primary">
+                            <i class="bi bi-pencil"></i> Modifier mon profil
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Articles de l'utilisateur -->
+        <div class="col-md-8">
+            <h3 class="mb-4">Mes Articles</h3>
+            {% if user.articles|length > 0 %}
+                <div class="row">
+                    {% for article in user.articles %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                {% if article.image %}
+                                    <img src="{{ asset('uploads/images/' ~ article.image) }}" 
+                                         class="card-img-top" 
+                                         alt="Image de l'article"
+                                         style="height: 200px; object-fit: cover;">
+                                {% endif %}
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ article.titre }}</h5>
+                                    <p class="card-text text-muted">
+                                        <small>Publié le {{ article.createdAt|date('d/m/Y') }}</small>
+                                    </p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <a href="{{ path('article_show', {id: article.id}) }}" 
+                                           class="btn btn-primary">Voir l'article</a>
+                                        <div class="btn-group">
+                                            <a href="{{ path('article_edit', {id: article.id}) }}" 
+                                               class="btn btn-outline-secondary">Modifier</a>
+                                            <form method="post" 
+                                                  action="{{ path('article_delete', {id: article.id}) }}" 
+                                                  style="display: inline;" 
+                                                  onsubmit="return confirm('Voulez-vous vraiment supprimer cet article ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ article.id) }}">
+                                                <button type="submit" class="btn btn-outline-danger">Supprimer</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    Vous n'avez pas encore publié d'articles.
+                    <a href="{{ path('article_new') }}" class="alert-link">Créer votre premier article</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

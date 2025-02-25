@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\User; // Assure l'import de l'entité User
 
 #[ORM\Entity(repositoryClass: ArticleRepository::class)]
 class Article
@@ -22,15 +23,34 @@ class Article
     #[ORM\Column(type: Types::TEXT)]
     private ?string $content = null;
 
+    #[ORM\Column(type: "datetime")]
+    private ?\DateTimeInterface $createdAt = null;
+
+    #[ORM\Column(type: "string", length: 255, nullable: true)]
+    private ?string $image = null;
+
     /**
      * @var Collection<int, Categorie>
      */
     #[ORM\ManyToMany(targetEntity: Categorie::class, inversedBy: 'articles')]
     private Collection $categories;
 
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'articles')]
+    #[ORM\JoinColumn(nullable: false)] // Rend la relation obligatoire
+    private ?User $user = null;
+
+    /**
+     * @var Collection<int, Commentaire>
+     */
+    #[ORM\OneToMany(targetEntity: Commentaire::class, mappedBy: 'article')]
+    private Collection $commentaires;
+
     public function __construct()
     {
         $this->categories = new ArrayCollection();
+        $this->commentaires = new ArrayCollection();
+        // Définir une date de création par défaut
+        $this->createdAt = new \DateTime();
     }
 
     public function getId(): ?int
@@ -62,6 +82,28 @@ class Article
         return $this;
     }
 
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): static
+    {
+        $this->image = $image;
+        return $this;
+    }
+
     /**
      * @return Collection<int, Categorie>
      */
@@ -86,4 +128,45 @@ class Article
         return $this;
     }
 
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Commentaire>
+     */
+    public function getCommentaires(): Collection
+    {
+        return $this->commentaires;
+    }
+
+    public function addCommentaire(Commentaire $commentaire): static
+    {
+        if (!$this->commentaires->contains($commentaire)) {
+            $this->commentaires->add($commentaire);
+            $commentaire->setArticle($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCommentaire(Commentaire $commentaire): static
+    {
+        if ($this->commentaires->removeElement($commentaire)) {
+            // set the owning side to null (unless already changed)
+            if ($commentaire->getArticle() === $this) {
+                $commentaire->setArticle(null);
+            }
+        }
+
+        return $this;
+    }
 }

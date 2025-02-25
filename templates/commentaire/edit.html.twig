@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier votre commentaire{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>Modifier votre commentaire</h1>
+
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+            
+            <div class="form-group mb-3">
+                {{ form_label(form.contenu, 'Contenu du commentaire') }}
+                {{ form_widget(form.contenu, {'attr': {'class': 'form-control', 'rows': 5}}) }}
+            </div>
+            
+            <div class="d-flex gap-2">
+                {{ form_rest(form) }}
+                <a href="{{ path('article_show', { id: commentaire.article.id }) }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Retour à l'article
+                </a>
+            </div>
+        {{ form_end(form, {'render_rest': false}) }}
+    </div>
+{% endblock %}

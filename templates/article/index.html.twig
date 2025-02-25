@@ -3,20 +3,88 @@
 {% block title %}Liste des Articles{% endblock %}
 
 {% block body %}
-<h1>Liste des Articles</h1>
+<div class="container">
+    <h1 class="mb-4">
+        {% if currentCategory is defined %}
+            Articles dans la catégorie : {{ currentCategory.nom }}
+        {% else %}
+            Liste des Articles
+        {% endif %}
+    </h1>
 
-<a href="{{ path('article_new') }}">Créer un nouvel article</a>
-
-<ul>
-    {% for article in articles %}
-        <li>
-            <a href="{{ path('article_show', { id: article.id }) }}">{{ article.Titre }}</a>
-            <a href="{{ path('article_edit', { id: article.id }) }}">Modifier</a>
-            <form method="post" action="{{ path('article_delete', { id: article.id }) }}" style="display: inline;" onsubmit="return confirm('Voulez-vous vraiment supprimer cet article ?');">
-                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ article.id) }}">
-                <button type="submit">Supprimer</button>
+    {# Barre de recherche #}
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <form action="{{ path('article_index') }}" method="GET" class="d-flex">
+                <input type="text" name="search" class="form-control me-2" placeholder="Rechercher un article..." value="{{ app.request.query.get('search') }}">
+                <button type="submit" class="btn btn-primary">Rechercher</button>
             </form>
-        </li>
-    {% endfor %}
-</ul>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <a href="{{ path('article_new') }}" class="btn btn-success">Créer un nouvel article</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Catégories</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="{{ path('article_index') }}" class="list-group-item list-group-item-action {% if currentCategory is not defined %}active{% endif %}">
+                            Toutes les catégories
+                        </a>
+                        {% for category in categories %}
+                            <a href="{{ path('article_by_category', { id: category.id }) }}" 
+                               class="list-group-item list-group-item-action {% if currentCategory is defined and currentCategory.id == category.id %}active{% endif %}">
+                                {{ category.nom }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="row">
+                {% for article in articles %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            {% if article.image %}
+                                <img src="{{ asset('uploads/images/' ~ article.image) }}" class="card-img-top" alt="Image de l'article" style="height: 200px; object-fit: cover;">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ article.titre }}</h5>
+                                <p class="card-text text-muted">
+                                    <small>Par {{ article.user.username }} le {{ article.createdAt|date('d/m/Y') }}</small>
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <a href="{{ path('article_show', { id: article.id }) }}" class="btn btn-primary">Lire plus</a>
+                                    {% if is_granted('ROLE_ADMIN') or app.user == article.user %}
+                                        <div class="btn-group">
+                                            <a href="{{ path('article_edit', { id: article.id }) }}" class="btn btn-outline-secondary">Modifier</a>
+                                            <form method="post" action="{{ path('article_delete', { id: article.id }) }}" style="display: inline;" onsubmit="return confirm('Voulez-vous vraiment supprimer cet article ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ article.id) }}">
+                                                <button type="submit" class="btn btn-outline-danger">Supprimer</button>
+                                            </form>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            Aucun article trouvé.
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

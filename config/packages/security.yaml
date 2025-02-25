@@ -20,38 +20,58 @@ security:
       pattern: ^/(_(profiler|wdt)|css|images|js)/  # Ce motif couvre les routes liées au profiler, aux fichiers CSS, JS et images
       security: false  # Pas de sécurité appliquée sur ces routes (les utilisateurs peuvent y accéder sans être authentifiés)
 
-    # Configuration principale du firewall pour toutes les autres routes
-    main:
-      pattern: ^/  # Cela couvre toutes les routes qui commencent par '/' (toutes les routes de l'application)
-      provider: app_user_provider  # Utilise le fournisseur d'utilisateurs défini ci-dessus
-      form_login:  # Authentification par formulaire
-        login_path: app_login  # La route pour afficher le formulaire de connexion
-        check_path: /login  # La route où les informations de connexion sont envoyées via une requête POST
-        default_target_path: /users  # Après une connexion réussie, l'utilisateur est redirigé vers la page /users
-      logout:  # Gestion de la déconnexion
-        path: /logout  # La route pour se déconnecter
+    login:
+      pattern: ^/api/login
+      stateless: true
+      json_login:
+        check_path: /api/login
+        username_path: email
+        password_path: password
+        success_handler: lexik_jwt_authentication.handler.authentication_success
+        failure_handler: lexik_jwt_authentication.handler.authentication_failure
 
-    # Configuration pour les API (commentée ici, mais peut être activée si nécessaire pour les connexions API basées sur JSON ou JWT)
-    # api_login:
-    #     pattern: ^/api/login  # Cette route serait spécifique aux API (connexion via API)
-    #     stateless: true  # Indique que l'API ne maintient pas de session (stateless)
-    #     json_login:  # Configuration pour une authentification JSON (souvent utilisée pour les APIs)
-    #         check_path: /api/login  # La route où les données de connexion sont envoyées
-    #         success_handler: lexik_jwt_authentication.handler.authentication_success  # Si la connexion réussit, la réponse JSON sera gérée ici
-    #         failure_handler: lexik_jwt_authentication.handler.authentication_failure  # Si la connexion échoue, la réponse JSON sera gérée ici
+    api:
+      pattern: ^/(api|comment/api)
+      stateless: true
+      provider: app_user_provider
+      jwt: ~
+
+    main:
+      lazy: true
+      provider: app_user_provider
+      form_login:
+        login_path: app_login
+        check_path: app_login
+        enable_csrf: true
+      logout:
+        path: app_logout
 
   # Configuration des contrôles d'accès (qui peut accéder à quelles routes en fonction de son rôle)
   access_control:
     # Autorise l'accès à la page de connexion sans être authentifié
-    - { path: ^/login, roles: PUBLIC_ACCESS }  # La page /login est publique (tout le monde peut y accéder)
+    - { path: ^/api/login, roles: PUBLIC_ACCESS }  # La page /login est publique (tout le monde peut y accéder)
 
     # Autorise l'accès à la page de déconnexion sans être authentifié
     - { path: ^/logout, roles: PUBLIC_ACCESS }  # La page /logout est publique (tout le monde peut y accéder)
 
-    # Autorise l'accès à la page d'inscription sans être authentifié
-    - { path: ^/users/new, roles: PUBLIC_ACCESS }  # La page /users/new (inscription) est publique (tout le monde peut y accéder)
-
-    # Restreint l'accès à la page des utilisateurs (/users) uniquement aux utilisateurs complètement authentifiés
-    - { path: ^/users/admin, roles: IS_AUTHENTICATED_FULLY }  # L'accès à la page /users est restreint aux utilisateurs qui sont entièrement authentifiés
-
     - { path: ^/categorie, roles: ROLE_ADMIN }
+
+    - { path: ^/article/, roles: PUBLIC_ACCESS }
+
+    - { path: ^/article/new, roles: IS_AUTHENTICATED_FULLY }
+
+    - { path: ^/comment/api, roles: IS_AUTHENTICATED_FULLY }  # Toutes les autres routes API nécessitent une authentification
+
+    - { path: ^/admin, roles: ROLE_ADMIN }
+
+    - { path: ^/profile, roles: ROLE_USER }
+
+    - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+
+monolog:
+    channels: ['security']
+    handlers:
+        security:
+            type: stream
+            path: "%kernel.logs_dir%/security.log"
+            level: debug
