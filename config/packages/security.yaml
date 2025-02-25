@@ -20,47 +20,39 @@ security:
       pattern: ^/(_(profiler|wdt)|css|images|js)/  # Ce motif couvre les routes liées au profiler, aux fichiers CSS, JS et images
       security: false  # Pas de sécurité appliquée sur ces routes (les utilisateurs peuvent y accéder sans être authentifiés)
 
-# Configuration pour les API (commentée ici, mais peut être activée si nécessaire pour les connexions API basées sur JSON ou JWT)
-    api:
+    login:
       pattern: ^/api/login
       stateless: true
       json_login:
-        check_path: /api/login  # La route où les identifiants sont envoyés
-        username_path: email          # Le champ JSON pour l'email
-        password_path: password       # Le champ JSON pour le mot de passe
-        success_handler: lexik_jwt_authentication.handler.authentication_success  # Gestionnaire de succès (pour JWT)
-        failure_handler: lexik_jwt_authentication.handler.authentication_failure  # Gestionnaire d'échec
-      # jwt: ~  # Active la vérification des tokens JWT pour les autres routes
-    
-    api_delete:
-      pattern: ^/comment/api/delete
-      stateless: true
-      jwt: ~  # Active la vérification des tokens JWT pour cette route
+        check_path: /api/login
+        username_path: email
+        password_path: password
+        success_handler: lexik_jwt_authentication.handler.authentication_success
+        failure_handler: lexik_jwt_authentication.handler.authentication_failure
 
-    # Configuration principale du firewall pour toutes les autres routes
+    api:
+      pattern: ^/(api|comment/api)
+      stateless: true
+      provider: app_user_provider
+      jwt: ~
+
     main:
-      pattern: ^/  # Cela couvre toutes les routes qui commencent par '/' (toutes les routes de l'application)
-      provider: app_user_provider  # Utilise le fournisseur d'utilisateurs défini ci-dessus
-      form_login:  # Authentification par formulaire
-        login_path: app_login  # La route pour afficher le formulaire de connexion
-        check_path: /login  # La route où les informations de connexion sont envoyées via une requête POST
-        default_target_path: /article  # Après une connexion réussie, l'utilisateur est redirigé vers la page /users
-      logout:  # Gestion de la déconnexion
-        path: /logout  # La route pour se déconnecter
+      lazy: true
+      provider: app_user_provider
+      form_login:
+        login_path: app_login
+        check_path: app_login
+        enable_csrf: true
+      logout:
+        path: app_logout
 
   # Configuration des contrôles d'accès (qui peut accéder à quelles routes en fonction de son rôle)
   access_control:
     # Autorise l'accès à la page de connexion sans être authentifié
-    - { path: ^/login, roles: PUBLIC_ACCESS }  # La page /login est publique (tout le monde peut y accéder)
+    - { path: ^/api/login, roles: PUBLIC_ACCESS }  # La page /login est publique (tout le monde peut y accéder)
 
     # Autorise l'accès à la page de déconnexion sans être authentifié
     - { path: ^/logout, roles: PUBLIC_ACCESS }  # La page /logout est publique (tout le monde peut y accéder)
-
-    # Autorise l'accès à la page d'inscription sans être authentifié
-    - { path: ^/users/new, roles: PUBLIC_ACCESS }  # La page /users/new (inscription) est publique (tout le monde peut y accéder)
-
-    # Restreint l'accès à la page des utilisateurs (/users) uniquement aux utilisateurs complètement authentifiés
-    - { path: ^/users/list, roles: ROLE_ADMIN }  # L'accès à la page /users/list est restreint aux utilisateurs qui sont admin
 
     - { path: ^/categorie, roles: ROLE_ADMIN }
 
@@ -68,13 +60,13 @@ security:
 
     - { path: ^/article/new, roles: IS_AUTHENTICATED_FULLY }
 
-    - { path: ^/api/login, roles: PUBLIC_ACCESS }  # La route de login est publique
+    - { path: ^/comment/api, roles: IS_AUTHENTICATED_FULLY }  # Toutes les autres routes API nécessitent une authentification
 
-    - { path: ^/comment/api/delete, roles: IS_AUTHENTICATED_FULLY }  # Toutes les autres routes API nécessitent une authentification
+    - { path: ^/admin, roles: ROLE_ADMIN }
 
-    # - { path: ^/api/login, roles: PUBLIC_ACCESS }
+    - { path: ^/profile, roles: ROLE_USER }
 
-    # - { path: ^/api/admin, roles: ROLE_ADMIN }
+    - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
 monolog:
     channels: ['security']
@@ -83,5 +75,3 @@ monolog:
             type: stream
             path: "%kernel.logs_dir%/security.log"
             level: debug
-
-

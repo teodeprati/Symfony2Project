@@ -4,17 +4,17 @@ namespace App\Controller;
 
 use App\Entity\Commentaire;
 use App\Entity\Article;
-use App\Repository\CommentaireRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use App\Repository\CommentaireRepository;
+use App\Repository\ArticleRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Psr\Log\LoggerInterface;
 use App\Form\CommentaireType;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/comment', name: 'comment_')]
 class CommentaireController extends AbstractController
@@ -117,32 +117,49 @@ class CommentaireController extends AbstractController
     #[Route('/api/delete/{id}', name: 'api_commentaire_delete', methods: ['DELETE'])]
     public function apiDelete(int $id, CommentaireRepository $commentaireRepository, EntityManagerInterface $entityManager, LoggerInterface $logger): JsonResponse
     {
-        $logger->info('Accès à la route /api/delete/{id}', ['id' => $id]);
-    
-        // Vérifie que l'utilisateur est authentifié
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
-    
-        // Vérifie que l'utilisateur est bien récupéré
-        $user = $this->getUser();
-        $logger->info('Utilisateur authentifié', ['user' => $user ? $user->getUsername() : 'null']);
-    
-        // Récupère le commentaire à supprimer
-        $commentaire = $commentaireRepository->find($id);
-    
-        if (!$commentaire) {
-            return new JsonResponse(['error' => 'Commentaire non trouvé'], 404);
+        try {
+            $logger->info('Début de la requête de suppression', ['id' => $id]);
+            
+            // Récupère l'utilisateur courant
+            $user = $this->getUser();
+            if (!$user) {
+                $logger->error('Utilisateur non authentifié');
+                return new JsonResponse(['error' => 'Utilisateur non authentifié'], 401);
+            }
+            
+            $logger->info('Utilisateur authentifié', ['username' => $user->getUsername()]);
+            
+            // Récupère le commentaire
+            $commentaire = $commentaireRepository->find($id);
+            if (!$commentaire) {
+                $logger->error('Commentaire non trouvé', ['id' => $id]);
+                return new JsonResponse(['error' => 'Commentaire non trouvé'], 404);
+            }
+            
+            // Vérifie les permissions
+            if (!$this->isGranted('ROLE_ADMIN') && $commentaire->getAuteur() !== $user) {
+                $logger->error('Permission refusée', [
+                    'user_id' => $user->getId(),
+                    'comment_author_id' => $commentaire->getAuteur()->getId()
+                ]);
+                return new JsonResponse(['error' => 'Vous n\'avez pas la permission de supprimer ce commentaire'], 403);
+            }
+            
+            // Supprime le commentaire
+            $entityManager->remove($commentaire);
+            $entityManager->flush();
+            
+            $logger->info('Commentaire supprimé avec succès', ['id' => $id]);
+            
+            return new JsonResponse(['message' => 'Commentaire supprimé avec succès']);
+            
+        } catch (\Exception $e) {
+            $logger->error('Erreur lors de la suppression du commentaire', [
+                'id' => $id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return new JsonResponse(['error' => 'Une erreur est survenue lors de la suppression du commentaire'], 500);
         }
-    
-        // Vérifie que l'utilisateur est l'auteur du commentaire ou un admin
-        if ($commentaire->getAuteur() !== $user && !$this->isGranted('ROLE_ADMIN')) {
-            return new JsonResponse(['error' => 'Vous ne pouvez pas supprimer ce commentaire.'], 403);
-        }
-    
-        // Supprime le commentaire
-        $entityManager->remove($commentaire);
-        $entityManager->flush();
-    
-        return new JsonResponse(['message' => 'Commentaire supprimé avec succès']);
     }
-
 }
