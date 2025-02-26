@@ -37,10 +37,18 @@ pipeline {
             }
         }
 
+        stage('Reset de la base') {
+            steps {
+                dir("${DEPLOY_DIR}") {
+                    sh 'php bin/console doctrine:database:drop --if-exists --force --env=prod'
+                    sh 'php bin/console doctrine:database:create --if-not-exists --env=prod'
+                }
+            }
+        }
+
         stage('Migration de la base de données') {
             steps {
                 dir("${DEPLOY_DIR}") {
-                    sh 'php bin/console doctrine:database:create --if-not-exists --env=prod'
                     sh 'php bin/console doctrine:migrations:migrate --no-interaction --env=prod'
                 }
             }
