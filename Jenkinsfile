@@ -23,15 +23,6 @@ pipeline {
             }
         }
 
-        stage('Build assets') {
-            steps {
-                dir("${DEPLOY_DIR}") {
-                    sh 'npm install'
-                    sh 'npm run build'
-                }
-            }
-        }
-
         stage('Configuration de l\'environnement') {
             steps {
                 script {

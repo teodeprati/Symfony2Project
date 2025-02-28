@@ -1,6 +1,6 @@
-    /* Style de la bannière avec image de fond */
+/* Style de la bannière avec image de fond */
 .banner {
-    background-image: url('../assets/image/bg-Skin.jpeg');
+    background-image: url('../../public/image/bg-Skin.jpeg');
     background-size: cover;
     background-position: center;
     color: white;
