@@ -28,13 +28,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 50)]
     private ?string $username = null;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Article::class)]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Article::class, orphanRemoval: true, cascade: ['persist', 'remove'])]
     private Collection $articles;
 
     /**
      * @var Collection<int, Commentaire>
      */
-    #[ORM\OneToMany(targetEntity: Commentaire::class, mappedBy: 'auteur')]
+    #[ORM\OneToMany(targetEntity: Commentaire::class, mappedBy: 'auteur', orphanRemoval: true, cascade: ['persist', 'remove'])]
     private Collection $commentaires;
 
     /**
