@@ -63,6 +63,14 @@ pipeline {
             }
         }
 
+        stage('Tests') {
+            steps {
+                dir("${DEPLOY_DIR}") {
+                    sh 'php bin/phpunit tests'
+                }
+            }
+        }
+
         stage('Déploiement') {
             steps {
                 sh "rm -rf /var/www/html/${DEPLOY_DIR}" // Supprime le dossier de destination
