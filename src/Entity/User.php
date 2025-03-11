@@ -37,10 +37,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Commentaire::class, mappedBy: 'auteur')]
     private Collection $commentaires;
 
+    /**
+     * @var Collection<int, Favoris>
+     */
+    #[ORM\OneToMany(targetEntity: Favoris::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $favoris;
+
     public function __construct()
     {
         $this->articles = new ArrayCollection();
         $this->commentaires = new ArrayCollection();
+        $this->favoris = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -60,6 +67,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+
     public function getRoles(): array
     {
         $roles = $this->roles;
@@ -74,7 +86,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getPassword(): ?string
+    public function getPassword(): string
     {
         return $this->password;
     }
@@ -84,6 +96,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->password = $password;
 
         return $this;
+    }
+
+    public function eraseCredentials(): void
+    {
     }
 
     public function getUsername(): ?string
@@ -96,15 +112,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->username = $username;
 
         return $this;
-    }
-
-    public function eraseCredentials(): void
-    {
-    }
-
-    public function getUserIdentifier(): string
-    {
-        return $this->email;
     }
 
     /**
@@ -128,9 +135,37 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeArticle(Article $article): self
     {
         if ($this->articles->removeElement($article)) {
-            // Set the owning side to null (unless already changed)
             if ($article->getUser() === $this) {
                 $article->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Favoris>
+     */
+    public function getFavoris(): Collection
+    {
+        return $this->favoris;
+    }
+
+    public function addFavoris(Favoris $favoris): self
+    {
+        if (!$this->favoris->contains($favoris)) {
+            $this->favoris->add($favoris);
+            $favoris->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFavoris(Favoris $favoris): self
+    {
+        if ($this->favoris->removeElement($favoris)) {
+            if ($favoris->getUser() === $this) {
+                $favoris->setUser(null);
             }
         }
 
@@ -145,7 +180,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->commentaires;
     }
 
-    public function addCommentaire(Commentaire $commentaire): static
+    public function addCommentaire(Commentaire $commentaire): self
     {
         if (!$this->commentaires->contains($commentaire)) {
             $this->commentaires->add($commentaire);
@@ -155,10 +190,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function removeCommentaire(Commentaire $commentaire): static
+    public function removeCommentaire(Commentaire $commentaire): self
     {
         if ($this->commentaires->removeElement($commentaire)) {
-            // set the owning side to null (unless already changed)
             if ($commentaire->getAuteur() === $this) {
                 $commentaire->setAuteur(null);
             }

@@ -1,0 +1,225 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Favoris{% endblock %}
+
+{% block body %}
+<style>
+    .favorites-header {
+        background: linear-gradient(135deg, #1a1a1a 0%, #373737 100%);
+        padding: 1.5rem 0;
+        margin-bottom: 1.5rem;
+        color: white;
+        border-radius: 0 0 15px 15px;
+    }
+
+    .favorites-title {
+        font-size: 2rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .favorites-count {
+        background: rgba(255,255,255,0.1);
+        padding: 0.4rem 0.8rem;
+        border-radius: 15px;
+        font-size: 0.9rem;
+    }
+
+    .favorite-card {
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #eee;
+        margin-bottom: 1rem;
+    }
+
+    .favorite-image {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 6px;
+        margin: 10px;
+    }
+
+    .favorite-image-placeholder {
+        width: 120px;
+        height: 120px;
+        background: #f5f5f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        margin: 10px;
+    }
+
+    .favorite-content {
+        padding: 1rem;
+    }
+
+    .favorite-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .favorite-date {
+        color: #888;
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .favorite-excerpt {
+        color: #666;
+        margin-bottom: 1rem;
+        line-height: 1.4;
+        font-size: 0.9rem;
+    }
+
+    .favorite-actions {
+        display: flex;
+        gap: 0.8rem;
+        align-items: center;
+    }
+
+    .btn-view {
+        background: #007bff;
+        color: white;
+        padding: 0.4rem 1rem;
+        border-radius: 4px;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .btn-view:hover {
+        background: #0056b3;
+        color: white;
+    }
+
+    .btn-remove {
+        background: transparent;
+        color: #dc3545;
+        padding: 0.4rem 1rem;
+        border-radius: 4px;
+        border: 1px solid #dc3545;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .btn-remove:hover {
+        background: #dc3545;
+        color: white;
+    }
+
+    .empty-favorites {
+        text-align: center;
+        padding: 2rem;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #eee;
+    }
+
+    .empty-favorites i {
+        font-size: 2rem;
+        color: #ddd;
+        margin-bottom: 0.8rem;
+    }
+
+    .empty-favorites h3 {
+        color: #666;
+        margin-bottom: 0.8rem;
+        font-size: 1.2rem;
+    }
+
+    .empty-favorites p {
+        color: #888;
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="favorites-header">
+    <div class="container">
+        <h1 class="favorites-title">
+            <i class="fas fa-star text-warning"></i>
+            Mes Favoris
+            <span class="favorites-count">{{ favoris|length }} article{% if favoris|length > 1 %}s{% endif %}</span>
+        </h1>
+    </div>
+</div>
+
+<div class="container">
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+
+    <div class="mt-4">
+        {% if favoris|length > 0 %}
+            {% for favori in favoris %}
+                <div class="favorite-card">
+                    <div class="row g-0">
+                        <div class="col-auto">
+                            {% if favori.article.image %}
+                                <img src="{{ asset('uploads/images/' ~ favori.article.image) }}" 
+                                     class="favorite-image"
+                                     alt="{{ favori.article.titre }}">
+                            {% else %}
+                                <div class="favorite-image-placeholder">
+                                    <i class="fas fa-image text-muted"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col">
+                            <div class="favorite-content">
+                                <h2 class="favorite-title">
+                                    <i class="fas fa-star text-warning"></i>
+                                    {{ favori.article.titre }}
+                                </h2>
+                                <div class="favorite-date">
+                                    <i class="far fa-calendar-alt"></i>
+                                    Ajouté le {{ favori.createdAt|date('d/m/Y') }}
+                                </div>
+                                <p class="favorite-excerpt">{{ favori.article.content|slice(0, 150) }}...</p>
+                                <div class="favorite-actions">
+                                    <a href="{{ path('article_show', {'id': favori.article.id}) }}" class="btn-view">
+                                        <i class="fas fa-eye"></i>
+                                        Voir
+                                    </a>
+                                    <a href="{{ path('app_favoris_toggle', {'id': favori.article.id}) }}" 
+                                       class="btn-remove">
+                                        <i class="fas fa-star"></i>
+                                        Retirer
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-favorites">
+                <i class="fas fa-star"></i>
+                <h3>Aucun favori pour le moment</h3>
+                <p>Commencez à ajouter des articles à vos favoris pour les retrouver ici !</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

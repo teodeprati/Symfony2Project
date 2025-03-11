@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\User; // Assure l'import de l'entité User
+use App\Entity\Favoris; // Assure l'import de l'entité Favoris
 
 #[ORM\Entity(repositoryClass: ArticleRepository::class)]
 class Article
@@ -45,10 +46,17 @@ class Article
     #[ORM\OneToMany(targetEntity: Commentaire::class, mappedBy: 'article')]
     private Collection $commentaires;
 
+    /**
+     * @var Collection<int, Favoris>
+     */
+    #[ORM\OneToMany(targetEntity: Favoris::class, mappedBy: 'article', orphanRemoval: true)]
+    private Collection $favoris;
+
     public function __construct()
     {
         $this->categories = new ArrayCollection();
         $this->commentaires = new ArrayCollection();
+        $this->favoris = new ArrayCollection();
         // Définir une date de création par défaut
         $this->createdAt = new \DateTime();
     }
@@ -164,6 +172,36 @@ class Article
             // set the owning side to null (unless already changed)
             if ($commentaire->getArticle() === $this) {
                 $commentaire->setArticle(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Favoris>
+     */
+    public function getFavoris(): Collection
+    {
+        return $this->favoris;
+    }
+
+    public function addFavoris(Favoris $favoris): static
+    {
+        if (!$this->favoris->contains($favoris)) {
+            $this->favoris->add($favoris);
+            $favoris->setArticle($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFavoris(Favoris $favoris): static
+    {
+        if ($this->favoris->removeElement($favoris)) {
+            // set the owning side to null (unless already changed)
+            if ($favoris->getArticle() === $this) {
+                $favoris->setArticle(null);
             }
         }
 
